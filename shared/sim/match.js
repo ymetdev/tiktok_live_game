@@ -35,10 +35,10 @@ export class Match {
     const stats = statsFor({ level: p.level, cls: p.cls, bonusPct: p.bonusPct || 0 }, this.B), c = this.B.classes[p.cls] || this.B.classes.novice;
     const u = { id, userId: p.userId, name: p.name, team: p.team, cls: p.cls, level: p.level, bot: !!p.bot, evo: evoTier(p.level, p.cls, this.B), stats, maxHp: stats.hp, hp: stats.hp, c,
       x: 0, y: 0, face: p.team === 'red' ? 1 : -1, dead: false, respawnAt: 0, atkCd: this.rng() * 0.5, skillCd: 3 + this.rng() * 5, target: null, retargetAt: 0,
-      kills: 0, damage: 0, baseDamage: 0, deaths: 0, shieldUntil: 0, moving: false, hitAt: -9, atkAt: -9 };
+      kills: 0, damage: 0, baseDamage: 0, deaths: 0, shieldUntil: 0, moving: false, hitAt: -9, atkAt: -9, px: 0, py: 0, hx: 0, hy: p.team === 'red' ? 1 : -1, skillAt: -9 };
     this._spawn(u); return u;
   }
-  _spawn(u) { const jitter = this.rng(); u.x = 3 + this.rng() * (this.W - 6); u.y = u.team === 'red' ? 8 + jitter * 5 : this.H - 8 - jitter * 5; u.hp = u.maxHp; u.dead = false; u.target = null; u.shieldUntil = this.t + 1; }
+  _spawn(u) { const jitter = this.rng(); u.x = 3 + this.rng() * (this.W - 6); u.y = u.team === 'red' ? 8 + jitter * 5 : this.H - 8 - jitter * 5; u.px = u.x; u.py = u.y; u.hp = u.maxHp; u.dead = false; u.target = null; u.shieldUntil = this.t + 1; }
 
   _grid() {
     this.grid = { red: new Map(), blue: new Map() };
@@ -77,6 +77,7 @@ export class Match {
     else if (S.kind === 'volley') { const hit = []; this._within(u.x, u.y, other(u.team), u.c.range + 1, (e) => hit.push(e)); hit.sort((a, b) => (a.x - u.x) ** 2 + (a.y - u.y) ** 2 - (b.x - u.x) ** 2 - (b.y - u.y) ** 2); for (const e of hit.slice(0, S.targets)) this._hit(u, e, S.mult, false, true); }
     else if (S.kind === 'meteor') { const list = []; this._within(tgt.x, tgt.y, other(u.team), S.radius, (e) => list.push(e)); for (const e of list) this._hit(u, e, S.mult, false, true); const b = this.bases[other(u.team)]; if (Math.hypot(b.x - tgt.x, b.y - tgt.y) <= S.radius + b.r) this._hitBase(u, other(u.team), S.mult * 0.5); }
     else if (S.kind === 'dash') { const a = Math.atan2(u.y - tgt.y, u.x - tgt.x); u.x = tgt.x + Math.cos(a) * 1.0; u.y = tgt.y + Math.sin(a) * 1.0; this._hit(u, tgt, S.mult, true); }
+    u.skillAt = this.t;
     if (this.emit) this.events.push({ k: 'skill', id: u.id, kind: S.kind, x: u.x, y: u.y, tx: tgt ? tgt.x : u.x, ty: tgt ? tgt.y : u.y });
     return true;
   }
@@ -89,6 +90,7 @@ export class Match {
       const u = this.units[rev ? n - 1 - i : i];
       if (u.dead) { if (this.t >= u.respawnAt) { this._spawn(u); if (this.emit) this.events.push({ k: 'respawn', id: u.id }); } continue; }
       u.atkCd -= dt; u.skillCd -= dt;
+      u.px = u.x; u.py = u.y;
       const eb = this.bases[other(u.team)];
       // target: nearest enemy soldier in aggro range, else the enemy base
       if (u.t_unit && u.t_unit.dead) u.t_unit = null;
@@ -109,11 +111,11 @@ export class Match {
           if (!hitBase) { this._hit(u, tgt, mult, !!crit, range > 3); if (u.c.splash) this._within(tgt.x, tgt.y, other(u.team), u.c.splash, (e) => { if (e !== tgt) this._hit(u, e, u.c.splashMult, false, true); }); }
           else this._hitBase(u, other(u.team), mult);
         }
-        u.face = tx >= u.x ? 1 : -1;
+        u.face = tx >= u.x ? 1 : -1; { const hd = Math.hypot(tx - u.x, ty - u.y) || 1; u.hx = (tx - u.x) / hd; u.hy = (ty - u.y) / hd; }
       } else {
         const dx = tx - u.x, dy = ty - u.y, d = Math.hypot(dx, dy) || 1; let vx = dx / d, vy = dy / d;
         const sep = this._sep(u); vx += sep[0]; vy += sep[1]; const vl = Math.hypot(vx, vy) || 1;
-        u.x += (vx / vl) * u.c.speed * dt; u.y += (vy / vl) * u.c.speed * dt; u.moving = true; u.face = vx >= 0 ? 1 : -1;
+        u.x += (vx / vl) * u.c.speed * dt; u.y += (vy / vl) * u.c.speed * dt; u.moving = true; u.face = vx >= 0 ? 1 : -1; u.hx = vx / vl; u.hy = vy / vl;
       }
       u.x = Math.max(1, Math.min(this.W - 1, u.x)); u.y = Math.max(1, Math.min(this.H - 1, u.y));
     }

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><title>RED vs BLUE — Stress test</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/":"/vendor/three/addons/"}}</script>
+<style>
+ body{margin:0;background:#05070b;color:#dfe8ff;font:13px system-ui,sans-serif;display:flex;gap:12px;height:100vh;overflow:hidden}
+ #stage{height:100vh;aspect-ratio:9/16;flex:none}
+ canvas{width:100%;height:100%;display:block}
+ #panel{padding:12px;max-width:340px}
+ label{display:block;margin:8px 0 2px} pre{background:#111826;padding:8px;border-radius:6px}
+ input[type=range]{width:100%}
+</style></head><body>
+<div id="stage"><canvas id="c"></canvas></div>
+<div id="panel">
+ <h3>Stress test</h3>
+ <label>Units (players): <b id="nv">100</b></label><input id="n" type="range" min="10" max="800" step="10" value="100">
+ <label>Fully animated units (cap): <b id="dv">160</b></label><input id="d" type="range" min="0" max="800" step="10" value="160">
+ <label><input id="aa" type="checkbox"> antialias (reload)</label>
+ <pre id="out">loading…</pre>
+ <small>Params: ?n=300&amp;cap=100&amp;auto=1&amp;w=1080&amp;h=1920</small>
+</div>
+<script type="module" src="/js/stress.js"></script>
+</body></html>

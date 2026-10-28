@@ -1,0 +1,2 @@
+Character models: KayKit — Character Pack: Adventurers 1.0 and Skeletons 1.0 by Kay Lousberg (www.kaylousberg.com), License CC0 1.0 (see LICENSE-*.txt).
+Models were repackaged (unused animation clips removed); not otherwise modified.
