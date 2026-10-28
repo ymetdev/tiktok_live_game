@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><title>RED vs BLUE — Operator</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0f141d;--card:#18202e;--ink:#e8eefc;--dim:#93a1bb;--line:#2a3550;--acc:#4b8bff}
+@media (prefers-color-scheme:light){:root{--bg:#f3f5fa;--card:#fff;--ink:#16202f;--dim:#5a6780;--line:#d5dbe8}}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,"Noto Sans Thai",sans-serif;padding:16px;max-width:900px;margin-inline:auto}
+h1{font-size:22px}h2{font-size:15px;margin:0 0 10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}button.s{background:transparent;color:var(--ink);border:1px solid var(--line)}button.d{background:#c0392b}
+input{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit}input.n{width:80px}
+code{background:var(--bg);padding:2px 6px;border-radius:6px;word-break:break-all}#log{font:12px ui-monospace,monospace;white-space:pre-wrap;max-height:220px;overflow:auto;color:var(--dim)}
+.k{color:var(--dim);font-size:13px}
+</style></head><body>
+<h1>RED vs BLUE — Operator</h1>
+<div class="card"><h2>Operator token</h2><div class="row"><input id="tok" type="password" placeholder="OPERATOR_TOKEN" size="34"><button id="save">Connect</button><span id="conn" class="k"></span></div></div>
+<div class="card"><h2>OBS / TikTok LIVE Studio</h2><p class="k">Browser source 1080×1920 (9:16), turn off “Control audio via OBS”:</p><div><code id="url">—</code></div></div>
+<div class="card"><h2>Simulator (fake audience)</h2>
+ <div class="row"><input id="cnt" class="n" type="number" value="40" min="1" max="5000"> viewers
+  <button data-a="spawn">Spawn crowd (random teams)</button><button data-a="spawn" data-t="red" class="s">all RED</button><button data-a="spawn" data-t="blue" class="s">all BLUE</button></div>
+ <div class="row" style="margin-top:8px"><button data-a="likes" class="s">Likes burst</button><button data-a="chat" class="s">Chat noise</button><button data-a="gifts" class="s">Gifts ×N</button><button data-a="giftstorm" class="s">Gift storm</button><button data-a="classes" class="s">Class picks 1–4</button><button data-a="duplicate" class="s">Duplicate gift (test dedupe)</button></div>
+ <div class="row" style="margin-top:8px"><button data-a="auto">Auto-activity ON</button><button data-a="auto" data-off="1" class="s">OFF</button><span id="sim" class="k"></span></div></div>
+<div class="card"><h2>Session</h2><div class="row"><button id="skip" class="s">Force phase: idle</button><button id="end" class="d">End LIVE session</button><button id="season" class="s">New season (reset aura/bonus if lifetime=season)</button></div><p class="k">Team choice is once per LIVE. “End LIVE session” clears team membership; progress (level/class/aura) is kept.</p></div>
+<div class="card"><h2>Leaderboard</h2><div id="lb" class="k">—</div></div>
+<div class="card"><h2>Log</h2><div id="log"></div></div>
+<script>
+const $ = (id) => document.getElementById(id), log = (m) => { $('log').textContent = new Date().toLocaleTimeString() + ' ' + m + '\n' + $('log').textContent; };
+let tok = localStorage.getItem('rb_op') || ''; $('tok').value = tok;
+const call = async (path, body) => { const r = await fetch('/api/operator/' + path, { method: body ? 'POST' : 'GET', headers: { 'x-operator-token': tok, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.status); return j; };
+async function connect() { tok = $('tok').value.trim(); try { const c = await call('channel-token'); localStorage.setItem('rb_op', tok); $('conn').textContent = 'connected'; $('url').textContent = `${location.origin}/game.html?token=${c.token}`; refresh(); } catch (e) { $('conn').textContent = 'failed: ' + e.message; } }
+async function refresh() { try { const s = await call('sim'); $('sim').textContent = `${s.viewers} fake viewers · ${s.sent} events sent · auto ${s.auto ? 'ON' : 'off'}`; const lb = await (await fetch('/api/leaderboard?limit=10')).json(); $('lb').innerHTML = lb.map((p, i) => `${i + 1}. ${p.nickname} — Lv.${p.level} ${p.cls} · aura ${p.auraTier} (+${p.bonusPct}%)`).join('<br>') || 'nobody yet'; } catch {} }
+$('save').onclick = connect; if (tok) connect(); setInterval(() => tok && refresh(), 5000);
+document.querySelectorAll('button[data-a]').forEach((b) => b.onclick = async () => { try { const r = await call('sim', { action: b.dataset.a, team: b.dataset.t, count: +$('cnt').value, on: !b.dataset.off }); log(b.dataset.a + ' → ' + JSON.stringify(r)); refresh(); } catch (e) { log('ERROR ' + e.message); } });
+$('skip').onclick = () => call('phase', { phase: 'idle' }).then((r) => log(JSON.stringify(r))).catch((e) => log('ERROR ' + e.message));
+$('end').onclick = () => confirm('End the LIVE session? Team membership is cleared.') && call('session/end', {}).then(() => log('session ended')).catch((e) => log('ERROR ' + e.message));
+$('season').onclick = () => confirm('Start a new season?') && call('season', {}).then((r) => log('season ' + r.season)).catch((e) => log('ERROR ' + e.message));
+</script></body></html>

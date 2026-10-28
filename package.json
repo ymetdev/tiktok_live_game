@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "RED vs BLUE — TikTok LIVE game (web page captured by OBS)",
+  "description": "RED vs BLUE \u2014 TikTok LIVE game (web page captured by OBS)",
   "engines": {
     "node": ">=22"
   },
@@ -13,17 +13,18 @@
     "test": "node --test \"test/unit/*.test.js\"",
     "test:api": "node --test \"test/api/*.test.js\"",
     "bridge": "node --env-file-if-exists=.env adapters/bridge.mjs",
-    "assets": "node tools/fetch-assets.mjs"
+    "assets": "node tools/fetch-assets.mjs",
+    "test:e2e": "node --test \"test/e2e/*.test.js\""
   },
   "dependencies": {
-    "pg": "^8.13.0",
-    "three": "^0.186.1"
+    "pg": "^8.13.0"
   },
   "optionalDependencies": {
     "tiktok-live-connector": "^2.0.0"
   },
   "devDependencies": {
     "@gltf-transform/core": "^4.5.1",
-    "@gltf-transform/functions": "^4.5.1"
+    "@gltf-transform/functions": "^4.5.1",
+    "three": "^0.186.1"
   }
 }

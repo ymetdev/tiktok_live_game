@@ -1,0 +1,16 @@
+# Render Blueprint: one Node web service + an external Postgres (Neon). Set DATABASE_URL in the dashboard.
+services:
+  - type: web
+    name: redblue-live
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev --omit=optional
+    startCommand: node server/index.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: OPERATOR_TOKEN
+        generateValue: true
+      - key: CHANNEL_TOKEN
+        generateValue: true
