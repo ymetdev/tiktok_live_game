@@ -118,7 +118,7 @@ export class Game {
     const matchId = (await this.pool.query('INSERT INTO matches (session_id, idx, seed) VALUES ($1, $2, $3) RETURNING id', [sid, idx, seed])).rows[0].id;
     s.matchId = matchId; s.phase = 'fight'; s.queue = null; s.likes.clear();
     this.hub.publish(channel, { type: 'phase', phase: 'fight', matchId });
-    return { matchId, idx, seed, sessionId: sid, roster: await this.roster(sid), balance: this.B.match };
+    return { matchId, idx, seed, sessionId: sid, roster: await this.roster(sid), balance: this.B.match, post: this.B.post };
   }
 
   async matchCommit(channel, { matchId, result }) {
@@ -165,7 +165,7 @@ export class Game {
       const mvp = parts.find((p) => p.userId === result.mvp) ? result.mvp : null, mvpRow = mvp ? rows.get(mvp) : null;
       respRoster.sort((a, b) => b.level - a.level || b.damage - a.damage);
       const response = { match: { id: String(matchId), winner: result.winner, reason: result.reason, duration: result.duration, baseHp: result.baseHp, mvp: mvpRow ? { userId: mvp, nickname: mvpRow.nickname, avatarUrl: mvpRow.avatar_url, cls: mvpRow.class, kills: parts.find((p) => p.userId === mvp).kills, damage: parts.find((p) => p.userId === mvp).damage } : null },
-        roster: respRoster, queueSize: queue.length, classPickWindowSec: B.post.classPickWindowSec, cutsceneSec: B.post.cutsceneSec };
+        roster: respRoster, queueSize: queue.length, classPickWindowSec: B.post.classPickWindowSec, cutsceneSec: B.post.cutsceneSec, post: B.post };
       await db.query('UPDATE matches SET committed = true, winner = $2, reason = $3, mvp_user = $4, ended_at = now(), stats = $5 WHERE id = $1', [matchId, result.winner, result.reason || null, mvp, JSON.stringify({ response, summary: { duration: result.duration, baseHp: result.baseHp } })]);
       return { response, queue };
     });
@@ -184,6 +184,6 @@ export class Game {
     const s = this.state(channel), ch = await this.channelRow(channel); let roster = [];
     const open = s.sessionId || (await this.pool.query('SELECT id FROM live_sessions WHERE channel = $1 AND ended_at IS NULL ORDER BY id DESC LIMIT 1', [channel])).rows[0]?.id;
     if (open) { s.sessionId = open; roster = await this.roster(open); }
-    return { phase: s.phase, sessionId: open || null, matchId: s.matchId, season: ch.season, roster, queueSize: s.queue?.size || 0, queueClosed: !!s.queue?.closed, balance: this.B.match };
+    return { phase: s.phase, sessionId: open || null, matchId: s.matchId, season: ch.season, roster, queueSize: s.queue?.size || 0, queueClosed: !!s.queue?.closed, balance: this.B.match, post: this.B.post };
   }
 }

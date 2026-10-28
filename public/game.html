@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><title>RED vs BLUE</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/":"/vendor/three/addons/"}}</script>
+<link rel="stylesheet" href="/css/game.css">
+</head><body>
+<div id="frame"><div id="root" class="phase-boot">
+  <canvas id="field"></canvas>
+  <div id="tags"></div>
+  <!-- fight HUD -->
+  <div id="hud">
+    <div class="bar red"><i id="redHp"></i><span id="redTxt"></span></div>
+    <div id="timer">0:00</div>
+    <div class="bar blue"><i id="blueHp"></i><span id="blueTxt"></span></div>
+    <div id="counts"></div>
+  </div>
+  <div id="feed"></div>
+  <div id="chat"></div>
+  <div id="join"><b>พิมพ์ในแชต</b> <span class="r">แดง</span> หรือ <span class="b">น้ำเงิน</span> เพื่อเข้าร่วมสงคราม!<small>Lv.10 พิมพ์ 1 อัศวิน · 2 นักธนู · 3 จอมเวท · 4 นักฆ่า</small></div>
+  <!-- lobby / result / post -->
+  <div id="lobby" class="panel"><h1>RED <em>vs</em> BLUE</h1><p id="lobbyMsg"></p><div id="lobbyCount"></div></div>
+  <div id="result" class="panel"><h2 id="resWin"></h2><p id="resSub"></p><div id="resMvp"></div><div id="picks"><h3>เลือกอาชีพ (Lv.10+)</h3><div id="pickList"></div><div id="pickHelp">พิมพ์ <b>1</b> อัศวิน · <b>2</b> นักธนู · <b>3</b> จอมเวท · <b>4</b> นักฆ่า</div><div id="pickTimer"></div></div></div>
+  <div id="roster"><div id="rosterHead"></div><div id="rosterRows"></div></div>
+  <div id="cut"><canvas id="stage"></canvas><div id="cutInfo"></div></div>
+  <div id="toast"></div>
+  <div id="status"></div>
+</div></div>
+<script type="module" src="/js/game.js"></script>
+</body></html>

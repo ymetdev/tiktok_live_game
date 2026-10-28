@@ -56,5 +56,5 @@ export const BALANCE = {
     ],
     bonusLifetime: 'permanent',        // 'permanent' | 'season' (reset when the season number changes)
   },
-  post: { cutsceneSec: 4, classPickWindowSec: 12, queueCloseBeforeEndSec: 0 },
+  post: { cutsceneSec: 4, classPickWindowSec: 12, lobbySec: 10, resultHoldSec: 3, maxCutsceneTotalSec: 120 }, // cutsceneSec shrinks (min 1.5 s) so the whole queue never exceeds maxCutsceneTotalSec
 };
